@@ -1,9 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import useFirestore from "../hooks/useFirestore";
 
 function ImageGrid({ setSelectedImg }) {
   const { docs } = useFirestore("images");
+
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    setCount(docs.length);
+  }, [docs.length]);
+
+  useEffect(() => {
+    const images = document.querySelectorAll("[data-src]");
+
+    function preloading(img) {
+      const src = img.getAttribute("data-src");
+      if (!src) return;
+      img.src = src;
+    }
+
+    const imgOptions = {
+      threshold: 0,
+      rootMargin: "0px 0px 0px 0px",
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        preloading(entry.target);
+
+        observer.unobserve(entry.target);
+      });
+    }, imgOptions);
+
+    images.forEach((image) => {
+      observer.observe(image);
+    });
+  }, [count]);
 
   return (
     <div className="img-grid">
@@ -17,7 +50,7 @@ function ImageGrid({ setSelectedImg }) {
             onClick={() => setSelectedImg(doc.url)}
           >
             <motion.img
-              src={doc.url}
+              data-src={doc.url}
               alt="uploaded pic"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
