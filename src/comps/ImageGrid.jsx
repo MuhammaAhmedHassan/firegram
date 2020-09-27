@@ -5,11 +5,6 @@ import useFirestore from "../hooks/useFirestore";
 function ImageGrid({ setSelectedImg }) {
   const { docs } = useFirestore("images");
 
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    setCount(docs.length);
-  }, [docs.length]);
-
   useEffect(() => {
     const images = document.querySelectorAll("[data-src]");
 
@@ -28,6 +23,7 @@ function ImageGrid({ setSelectedImg }) {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         preloading(entry.target);
+        console.log(entry.target);
 
         observer.unobserve(entry.target);
       });
@@ -36,7 +32,7 @@ function ImageGrid({ setSelectedImg }) {
     images.forEach((image) => {
       observer.observe(image);
     });
-  }, [count]);
+  }, [docs.length]);
 
   return (
     <div className="img-grid">
